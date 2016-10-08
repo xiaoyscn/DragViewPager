@@ -1,10 +1,10 @@
 package xiaoys.me.lrviewpager;
 
+import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewConfigurationCompat;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -12,15 +12,17 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.Interpolator;
+import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
-import android.widget.Scroller;
 
 /**
  * Created by xiaoys on 2016/6/15.
  */
-public class LRPtrViewPager extends ViewGroup {
+public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorUpdateListener {
 
-    private static final int DEFAULT_RESET_DURATION = 800;
+    private static final int DEFAULT_RESET_DURATION = 300;
 
     /**
      * View
@@ -36,6 +38,7 @@ public class LRPtrViewPager extends ViewGroup {
      */
     private int mResetDuration = DEFAULT_RESET_DURATION;//reset duration
     private float mScrollSnapRatio = 1f;
+    private Interpolator mResetInterpolator = new AccelerateInterpolator();
     private boolean mFlexible = true;
 
     /**
@@ -46,7 +49,7 @@ public class LRPtrViewPager extends ViewGroup {
     private float mActionDownX;
     private float mActionMoveX;
 
-    private Scroller mScroller;
+    private ValueAnimator mResetAnimator;
     private OnRefreshCallback mCallback;
 
     public LRPtrViewPager(Context context) {
@@ -81,8 +84,6 @@ public class LRPtrViewPager extends ViewGroup {
 
         mRight = new FrameLayout(context);
         addView(mRight);
-
-        mScroller = new Scroller(context);
     }
 
     @Override
@@ -111,8 +112,8 @@ public class LRPtrViewPager extends ViewGroup {
         switch (ev.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 mActionDownX = ev.getX();
-                if (!mScroller.isFinished()) {
-                    mScroller.forceFinished(true);
+                if (mResetAnimator != null && mResetAnimator.isRunning()) {
+                    mResetAnimator.cancel();
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
@@ -155,21 +156,31 @@ public class LRPtrViewPager extends ViewGroup {
     }
 
     @Override
-    public void computeScroll() {
-        if (mScroller.computeScrollOffset()) {
-            scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
-            postInvalidate();
+    protected void onDetachedFromWindow() {
+        if (mResetAnimator != null && mResetAnimator.isStarted()) {
+            mResetAnimator.cancel();
+            mResetAnimator = null;
         }
+        super.onDetachedFromWindow();
     }
 
     /**
      * Reset widget to origin state
      */
     private void resetOffset() {
-        int scrollX = getScrollX();
-        int deltaX = -scrollX;
-        mScroller.startScroll(getScrollX(), 0, deltaX, 0, mResetDuration);
-        invalidate();
+        if (mResetAnimator == null) {
+            mResetAnimator = ValueAnimator.ofInt(getScrollX(), 0);
+            mResetAnimator.addUpdateListener(this);
+            mResetAnimator.setInterpolator(mResetInterpolator);
+            mResetAnimator.setDuration(mResetDuration);
+        }
+        mResetAnimator.start();
+    }
+
+    @Override
+    public void onAnimationUpdate(ValueAnimator animation) {
+        int value = (int) animation.getAnimatedValue();
+        scrollTo(value, 0);
     }
 
     private float getTouchSnap() {
@@ -239,6 +250,7 @@ public class LRPtrViewPager extends ViewGroup {
     public void setCallback(OnRefreshCallback callback) {
         mCallback = callback;
     }
+
 
     public interface OnRefreshCallback {
         void onRefresh();

@@ -11,4 +11,6 @@ public interface IUIHandler {
     void onPull(LRPtrViewPager viewPager);
 
     void onRelease(LRPtrViewPager viewPager);
+
+    void onEnd(LRPtrViewPager viewPager);
 }
