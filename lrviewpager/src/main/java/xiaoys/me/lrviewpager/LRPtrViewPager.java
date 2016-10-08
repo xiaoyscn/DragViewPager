@@ -7,12 +7,12 @@ import android.os.Build;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.FrameLayout;
@@ -21,6 +21,10 @@ import android.widget.FrameLayout;
  * Created by xiaoys on 2016/6/15.
  */
 public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorUpdateListener {
+
+    public static final int STATE_NORMAL = 0;
+    public static final int STATE_DRAG_LEFT = 1;
+    public static final int STATE_DRAG_RIGHT = 2;
 
     private static final int DEFAULT_RESET_DURATION = 300;
 
@@ -38,7 +42,7 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
      */
     private int mResetDuration = DEFAULT_RESET_DURATION;//reset duration
     private float mScrollSnapRatio = 1f;
-    private Interpolator mResetInterpolator = new AccelerateInterpolator();
+    private Interpolator mResetInterpolator = new LinearInterpolator();
     private boolean mFlexible = true;
 
     /**
@@ -48,9 +52,10 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
     private float mMinTouchDistance;
     private float mActionDownX;
     private float mActionMoveX;
+    private int mState;
 
     private ValueAnimator mResetAnimator;
-    private OnRefreshCallback mCallback;
+    private OnRefreshCallback mOnRefreshCallback;
 
     public LRPtrViewPager(Context context) {
         this(context, null);
@@ -109,6 +114,7 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
+        Log.e("onInterceptTouchEvent", ev.getAction() + "");
         switch (ev.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 mActionDownX = ev.getX();
@@ -120,12 +126,15 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
                 mActionMoveX = ev.getX();
                 //如果是最后一个，拦截向左滑动事件
                 if (isLastItem() && mActionMoveX - mActionDownX < -mMinTouchDistance) {
+                    mState = STATE_DRAG_LEFT;
                     return true;
                 }
                 //如果是第一个， 拦截向右滑动事件
                 else if (isFirstItem() && mActionMoveX - mActionDownX > mMinTouchDistance) {
+                    mState = STATE_DRAG_RIGHT;
                     return true;
                 }
+                resetOffset();
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -138,21 +147,32 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        Log.e("onTouchEvent", event.getAction() + "");
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_MOVE:
                 float offset = event.getX() - mActionMoveX;
-                scrollBy(-(int) (getTouchSnap() * offset), 0);
+                scrollBy(getCorrectScrollX(-(int) (getTouchSnap() * offset)), 0);
                 mActionMoveX = event.getX();
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 resetOffset();
-//                if (mCallback != null && Math.abs(getScrollX()) > mScrollSnap) {
-//                    mCallback.onRefresh();
+//                if (mOnRefreshCallback != null && Math.abs(getScrollX()) > mScrollSnap) {
+//                    mOnRefreshCallback.onRefresh();
 //                }
                 break;
         }
         return super.onTouchEvent(event);
+    }
+
+    private int getCorrectScrollX(int x) {
+        if (mState == STATE_DRAG_LEFT) {
+            return Math.max(0, x);
+        } else if (mState == STATE_DRAG_RIGHT) {
+            return Math.min(0, x);
+        } else {
+            return 0;
+        }
     }
 
     @Override
@@ -168,11 +188,17 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
      * Reset widget to origin state
      */
     private void resetOffset() {
+        mState = STATE_NORMAL;
+        if (getScrollX() == 0) {
+            return;
+        }
         if (mResetAnimator == null) {
             mResetAnimator = ValueAnimator.ofInt(getScrollX(), 0);
             mResetAnimator.addUpdateListener(this);
             mResetAnimator.setInterpolator(mResetInterpolator);
             mResetAnimator.setDuration(mResetDuration);
+        } else {
+            mResetAnimator.setIntValues(getScrollX(), 0);
         }
         mResetAnimator.start();
     }
@@ -247,8 +273,8 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
         mViewPager.addOnPageChangeListener(listener);
     }
 
-    public void setCallback(OnRefreshCallback callback) {
-        mCallback = callback;
+    public void setOnRefreshCallback(OnRefreshCallback onRefreshCallback) {
+        mOnRefreshCallback = onRefreshCallback;
     }
 
 
