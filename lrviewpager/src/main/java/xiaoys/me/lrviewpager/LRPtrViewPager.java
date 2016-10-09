@@ -4,6 +4,7 @@ import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
+import android.support.annotation.FloatRange;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
@@ -42,6 +43,7 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
      */
     private int mResetDuration = DEFAULT_RESET_DURATION;//reset duration
     private float mScrollSnapRatio = 1f;
+    private float mDampingFactor = 0.85f;
     private Interpolator mResetInterpolator = new LinearInterpolator();
     private boolean mFlexible = true;
 
@@ -114,7 +116,6 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        Log.e("onInterceptTouchEvent", ev.getAction() + "");
         switch (ev.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 mActionDownX = ev.getX();
@@ -147,19 +148,18 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.e("onTouchEvent", event.getAction() + "");
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_MOVE:
-                float offset = event.getX() - mActionMoveX;
-                scrollBy(getCorrectScrollX(-(int) (getTouchSnap() * offset)), 0);
                 mActionMoveX = event.getX();
+                float offset = mActionMoveX - mActionDownX;
+                scrollTo(getCorrectScrollX((int) offset), 0);
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 resetOffset();
-//                if (mOnRefreshCallback != null && Math.abs(getScrollX()) > mScrollSnap) {
-//                    mOnRefreshCallback.onRefresh();
-//                }
+                if (mOnRefreshCallback != null && Math.abs(getScrollX()) > mScrollSnap) {
+                    mOnRefreshCallback.onRefresh();
+                }
                 break;
         }
         return super.onTouchEvent(event);
@@ -167,9 +167,9 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
 
     private int getCorrectScrollX(int x) {
         if (mState == STATE_DRAG_LEFT) {
-            return Math.max(0, x);
+            return (int) Math.pow(Math.max(0, -x), mDampingFactor);
         } else if (mState == STATE_DRAG_RIGHT) {
-            return Math.min(0, x);
+            return -(int) Math.pow(Math.max(0, x), mDampingFactor);
         } else {
             return 0;
         }
@@ -207,12 +207,6 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
     public void onAnimationUpdate(ValueAnimator animation) {
         int value = (int) animation.getAnimatedValue();
         scrollTo(value, 0);
-    }
-
-    private float getTouchSnap() {
-        float snap = (float) Math.abs(getScrollX()) / mScrollSnap;
-
-        return Math.max(1 - snap, 0.6f);
     }
 
     public void setAdapter(PagerAdapter adapter) {
@@ -262,6 +256,16 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
         return mViewPager.getCurrentItem() == getCount() - 1;
     }
 
+    /**
+     * 设置拖拽的阻尼系数(0f - 1f)
+     * 建议保持在(0.6f - 1f)，越接近1f，阻力越小
+     *
+     * @param dampingFactor
+     */
+    public void setDampingFactor(@FloatRange(from = 0f, to = 1f) float dampingFactor) {
+        mDampingFactor = dampingFactor;
+    }
+
     public void notifyDataSetChanged() {
         PagerAdapter adapter = mViewPager.getAdapter();
         if (adapter != null) {
@@ -276,7 +280,6 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
     public void setOnRefreshCallback(OnRefreshCallback onRefreshCallback) {
         mOnRefreshCallback = onRefreshCallback;
     }
-
 
     public interface OnRefreshCallback {
         void onRefresh();

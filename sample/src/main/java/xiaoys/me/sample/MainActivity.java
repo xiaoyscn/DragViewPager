@@ -9,6 +9,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
+import xiaoys.me.lrviewpager.DefaultUIHandler;
 import xiaoys.me.lrviewpager.LRPtrViewPager;
 
 public class MainActivity extends AppCompatActivity {
@@ -21,10 +22,18 @@ public class MainActivity extends AppCompatActivity {
 
         List<PageEntity> list = new ArrayList<>();
         list.add(new PageEntity(0, Color.parseColor("#ff0000")));
-        list.add(new PageEntity(0, Color.parseColor("#ffff00")));
-        list.add(new PageEntity(0, Color.parseColor("#00ff00")));
-        list.add(new PageEntity(0, Color.parseColor("#00ffff")));
+        list.add(new PageEntity(1, Color.parseColor("#ffff00")));
+        list.add(new PageEntity(2, Color.parseColor("#00ff00")));
+        list.add(new PageEntity(3, Color.parseColor("#00ffff")));
         viewPager.setAdapter(new LRAdapter(list));
+        DefaultUIHandler left = new DefaultUIHandler(this);
+        left.setDragText("继续拖拽");
+        left.setReleaseText("释放拖拽");
+        viewPager.setLeftView(left);
+        DefaultUIHandler right = new DefaultUIHandler(this);
+        right.setDragText("继续拖拽");
+        right.setReleaseText("释放拖拽");
+        viewPager.setRightView(right);
     }
 
     public static class LRAdapter extends RecyclerPageAdapter<PageEntity>{
