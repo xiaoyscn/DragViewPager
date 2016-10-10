@@ -16,16 +16,21 @@ import android.widget.TextView;
 
 public class DefaultUIHandler extends FrameLayout implements IUIHandler {
 
+    public static final int ORIENTATION_LEFT = 0;
+    public static final int ORIENTATION_RIGHT = 1;
+
     private TextView mTextContent;
     private ImageView mImageIcon;
 
     private int mLeftIcon = R.mipmap.ic_arrow_circle_left;
     private int mRightIcon = R.mipmap.ic_arrow_circle_right;
-    private String mDragText;
-    private String mReleaseText;
+    private String mDragText = "";
+    private String mReleaseText = "";
+    private int mOrientation;
 
-    public DefaultUIHandler(Context context) {
+    public DefaultUIHandler(Context context, int orientation) {
         this(context, null);
+        mOrientation = orientation;
     }
 
     public DefaultUIHandler(Context context, AttributeSet attrs) {
@@ -49,6 +54,10 @@ public class DefaultUIHandler extends FrameLayout implements IUIHandler {
         mImageIcon = (ImageView) findViewById(R.id.iv_icon);
     }
 
+    public void setOrientation(int orientation){
+        mOrientation = orientation;
+    }
+
     public void setDragText(String dragText){
         mDragText = dragText;
     }
@@ -70,12 +79,30 @@ public class DefaultUIHandler extends FrameLayout implements IUIHandler {
 
     @Override
     public void onBegin(LRPtrViewPager viewPager) {
-
+        setText(mDragText);
     }
 
     @Override
     public void onPull(LRPtrViewPager viewPager) {
-
+        if (viewPager.isOverSnap()){
+            if (!mReleaseText.equals(mTextContent.getText().toString())){
+                setText(mReleaseText);
+                if (mOrientation == ORIENTATION_LEFT){
+                    mImageIcon.setImageResource(mLeftIcon);
+                }else{
+                    mImageIcon.setImageResource(mRightIcon);
+                }
+            }
+        }else{
+            if (!mDragText.equals(mTextContent.getText().toString())){
+                setText(mDragText);
+                if (mOrientation == ORIENTATION_LEFT){
+                    mImageIcon.setImageResource(mRightIcon);
+                }else{
+                    mImageIcon.setImageResource(mLeftIcon);
+                }
+            }
+        }
     }
 
     @Override

@@ -8,7 +8,6 @@ import android.support.annotation.FloatRange;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -57,7 +56,7 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
     private int mState;
 
     private ValueAnimator mResetAnimator;
-    private OnRefreshCallback mOnRefreshCallback;
+    private OnReleaseListener mOnRefreshCallback;
 
     public LRPtrViewPager(Context context) {
         this(context, null);
@@ -128,11 +127,23 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
                 //如果是最后一个，拦截向左滑动事件
                 if (isLastItem() && mActionMoveX - mActionDownX < -mMinTouchDistance) {
                     mState = STATE_DRAG_LEFT;
+                    if (mLeftUIHandler != null) {
+                        mLeftUIHandler.onBegin(this);
+                    }
+                    if (mRightUIHandler != null) {
+                        mRightUIHandler.onBegin(this);
+                    }
                     return true;
                 }
                 //如果是第一个， 拦截向右滑动事件
                 else if (isFirstItem() && mActionMoveX - mActionDownX > mMinTouchDistance) {
                     mState = STATE_DRAG_RIGHT;
+                    if (mLeftUIHandler != null) {
+                        mLeftUIHandler.onBegin(this);
+                    }
+                    if (mRightUIHandler != null) {
+                        mRightUIHandler.onBegin(this);
+                    }
                     return true;
                 }
                 resetOffset();
@@ -153,12 +164,24 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
                 mActionMoveX = event.getX();
                 float offset = mActionMoveX - mActionDownX;
                 scrollTo(getCorrectScrollX((int) offset), 0);
+                if (mLeftUIHandler != null) {
+                    mLeftUIHandler.onPull(this);
+                }
+                if (mRightUIHandler != null) {
+                    mRightUIHandler.onPull(this);
+                }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
                 resetOffset();
-                if (mOnRefreshCallback != null && Math.abs(getScrollX()) > mScrollSnap) {
-                    mOnRefreshCallback.onRefresh();
+                if (mLeftUIHandler != null) {
+                    mLeftUIHandler.onRelease(this);
+                }
+                if (mRightUIHandler != null) {
+                    mRightUIHandler.onRelease(this);
+                }
+                if (mOnRefreshCallback != null) {
+                    mOnRefreshCallback.onRelease(isOverSnap());
                 }
                 break;
         }
@@ -207,6 +230,14 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
     public void onAnimationUpdate(ValueAnimator animation) {
         int value = (int) animation.getAnimatedValue();
         scrollTo(value, 0);
+        if (value == 0) {
+            if (mLeftUIHandler != null) {
+                mLeftUIHandler.onEnd(this);
+            }
+            if (mRightUIHandler != null) {
+                mRightUIHandler.onEnd(this);
+            }
+        }
     }
 
     public void setAdapter(PagerAdapter adapter) {
@@ -240,6 +271,10 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
         } else {
             mRightUIHandler = null;
         }
+    }
+
+    public boolean isOverSnap(){
+        return  Math.abs(getScrollX()) > mScrollSnap;
     }
 
     /**
@@ -277,11 +312,11 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
         mViewPager.addOnPageChangeListener(listener);
     }
 
-    public void setOnRefreshCallback(OnRefreshCallback onRefreshCallback) {
-        mOnRefreshCallback = onRefreshCallback;
+    public void setOnReleaseListener(OnReleaseListener onReleaseListener) {
+        mOnRefreshCallback = onReleaseListener;
     }
 
-    public interface OnRefreshCallback {
-        void onRefresh();
+    public interface OnReleaseListener {
+        void onRelease(boolean isOverSnap);
     }
 }
