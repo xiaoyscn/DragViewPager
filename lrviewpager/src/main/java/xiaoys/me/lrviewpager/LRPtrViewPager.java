@@ -77,13 +77,13 @@ public class LRPtrViewPager extends ViewGroup implements ValueAnimator.AnimatorU
         mViewPager.setOverScrollMode(OVER_SCROLL_NEVER);
         //set default id for ViewPager
         mViewPager.setId(R.id.id_vp_default);
-        addView(mViewPager);
+        addView(mViewPager, new ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
         mLeftHolder = new FrameLayout(context);
-        addView(mLeftHolder);
+        addView(mLeftHolder, new ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
 
         mRightHolder = new FrameLayout(context);
-        addView(mRightHolder);
+        addView(mRightHolder, new ViewGroup.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
     }
 
     @Override

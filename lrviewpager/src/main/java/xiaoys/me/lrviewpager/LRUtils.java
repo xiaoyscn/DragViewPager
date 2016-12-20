@@ -15,7 +15,7 @@ class LRUtils {
     static void setUIHandler(ViewGroup holder, View view, IUIHandler[] uiHandler) {
         holder.removeAllViews();
         ViewGroup.LayoutParams lp =
-                new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT, Gravity.CENTER);
+                new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
         holder.addView(view, lp);
 
         uiHandler[0] = view instanceof IUIHandler ? (IUIHandler) view : null;
