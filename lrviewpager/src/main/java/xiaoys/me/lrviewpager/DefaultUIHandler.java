@@ -1,6 +1,7 @@
 package xiaoys.me.lrviewpager;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -84,7 +85,7 @@ public class DefaultUIHandler extends FrameLayout implements IUIHandler {
 
     @Override
     public void onPull(LRPtrViewPager viewPager) {
-        if (viewPager.isOverSnap()){
+        if (viewPager.isOverThreshold()){
             if (!mReleaseText.equals(mTextContent.getText().toString())){
                 setText(mReleaseText);
                 if (mOrientation == ORIENTATION_LEFT){

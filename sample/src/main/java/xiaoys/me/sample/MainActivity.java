@@ -3,7 +3,9 @@ package xiaoys.me.sample;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -15,10 +17,19 @@ import xiaoys.me.lrviewpager.LRPtrViewPager;
 
 public class MainActivity extends AppCompatActivity {
 
+    private LRPtrViewPager mViewPager;
+    private TextView mTvState;
+    private Button mBtnReset;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        mViewPager = (LRPtrViewPager) findViewById(R.id.lr_ptr_view_pager);
+        mTvState = (TextView) findViewById(R.id.tv_state);
+        mBtnReset = (Button) findViewById(R.id.btn_reset);
+
         LRPtrViewPager viewPager = (LRPtrViewPager) findViewById(R.id.lr_ptr_view_pager);
 
         List<PageEntity> list = new ArrayList<>();
@@ -27,6 +38,8 @@ public class MainActivity extends AppCompatActivity {
         list.add(new PageEntity(2, Color.parseColor("#00ff00")));
         list.add(new PageEntity(3, Color.parseColor("#00ffff")));
         viewPager.setAdapter(new LRAdapter(list));
+
+
         DefaultUIHandler left = new DefaultUIHandler(this, DefaultUIHandler.ORIENTATION_LEFT);
         left.setDragText("继续拖拽");
         left.setReleaseText("释放拖拽");
@@ -38,12 +51,21 @@ public class MainActivity extends AppCompatActivity {
 
         viewPager.setOnReleaseListener(new LRPtrViewPager.OnReleaseListener() {
             @Override
-            public void onRelease(boolean isOverSnap) {
-                if (isOverSnap){
-                    Toast.makeText(MainActivity.this, "事件触发", Toast.LENGTH_SHORT).show();
-                }else{
-                    Toast.makeText(MainActivity.this, "事件未触发", Toast.LENGTH_SHORT).show();
+            public void onRelease(boolean overThreshold, int orientation, int when) {
+                if (overThreshold) {
+                    String orientationMsg = orientation == LRPtrViewPager.OnReleaseListener.LEFT ?
+                            "左边" : "右边";
+                    String whenMsg = when == LRPtrViewPager.OnReleaseListener.ON_RELEASE ?
+                            "释放" : "结束";
+                    mTvState.append(orientationMsg + whenMsg + "\n");
                 }
+            }
+        });
+
+        mBtnReset.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mTvState.setText("");
             }
         });
     }
