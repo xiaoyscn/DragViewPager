@@ -1,10 +1,13 @@
 package xiaoys.me.lrviewpager;
 
 import android.animation.ValueAnimator;
-import android.view.Gravity;
+import android.content.Context;
+import android.support.v4.view.ViewPager;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.FrameLayout;
+
+import java.util.List;
+
+import static android.view.View.OVER_SCROLL_NEVER;
 
 /**
  * Created by xiaoys on 2016/12/20.
@@ -12,13 +15,18 @@ import android.widget.FrameLayout;
 
 class LRUtils {
 
-    static void setUIHandler(ViewGroup holder, View view, IUIHandler[] uiHandler) {
-        holder.removeAllViews();
-        ViewGroup.LayoutParams lp =
-                new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
-        holder.addView(view, lp);
+    static ViewPager providerDefaultVP(Context context) {
+        ViewPager viewPager = new ViewPager(context);
+        //set default id for ViewPager
+        viewPager.setId(R.id.id_vp_default);
+        viewPager.setOverScrollMode(OVER_SCROLL_NEVER);
+        return viewPager;
+    }
 
-        uiHandler[0] = view instanceof IUIHandler ? (IUIHandler) view : null;
+    static void layout(View view, int left, int top, int right, int bottom) {
+        if (view != null) {
+            view.layout(left, top, right, bottom);
+        }
     }
 
     static int computeScrollDistance(int offset, float factor) {
@@ -32,30 +40,44 @@ class LRUtils {
         }
     }
 
-    static void sendOnBegin(IUIHandler uiHandler, LRPtrViewPager viewPager) {
-        if (uiHandler != null) {
-            uiHandler.onBegin(viewPager);
+    static void sendUIHandlerOnBegin(List<DragViewPager.IUIHandler> uiHandlers, @DragViewPager.Which int which, DragViewPager viewPager) {
+        if (uiHandlers != null && uiHandlers.size() > 0) {
+            for (DragViewPager.IUIHandler uiHandler : uiHandlers) {
+                uiHandler.onBegin(viewPager, which);
+            }
         }
-
     }
 
-    static void sendOnPull(IUIHandler uiHandler, LRPtrViewPager viewPager) {
-        if (uiHandler != null) {
-            uiHandler.onPull(viewPager);
+    static void sendUIHandlerOnPull(List<DragViewPager.IUIHandler> uiHandlers, @DragViewPager.Which int which, DragViewPager viewPager) {
+        if (uiHandlers != null && uiHandlers.size() > 0) {
+            for (DragViewPager.IUIHandler uiHandler : uiHandlers) {
+                uiHandler.onPull(viewPager, which);
+            }
         }
-
     }
 
-    static void sendOnRelease(IUIHandler uiHandler, LRPtrViewPager viewPager) {
-        if (uiHandler != null) {
-            uiHandler.onRelease(viewPager);
+    static void sendUIHandlerOnRelease(List<DragViewPager.IUIHandler> uiHandlers, @DragViewPager.Which int which, DragViewPager viewPager) {
+        if (uiHandlers != null && uiHandlers.size() > 0) {
+            for (DragViewPager.IUIHandler uiHandler : uiHandlers) {
+                uiHandler.onRelease(viewPager, which);
+            }
         }
-
     }
 
-    static void sendOnEnd(IUIHandler uiHandler, LRPtrViewPager viewPager) {
-        if (uiHandler != null) {
-            uiHandler.onEnd(viewPager);
+    static void sendUIHandlerOnEnd(List<DragViewPager.IUIHandler> uiHandlers, @DragViewPager.Which int which, DragViewPager viewPager) {
+        if (uiHandlers != null && uiHandlers.size() > 0) {
+            for (DragViewPager.IUIHandler uiHandler : uiHandlers) {
+                uiHandler.onEnd(viewPager, which);
+            }
+        }
+    }
+
+    static void sendOnRelease(List<DragViewPager.OnReleaseListener> releaseListeners, boolean isOverThreshold,
+                              @DragViewPager.Which int which, @DragViewPager.OnReleaseListener.When int when) {
+        if (releaseListeners != null && releaseListeners.size() > 0) {
+            for (DragViewPager.OnReleaseListener releaseListener : releaseListeners) {
+                releaseListener.onRelease(isOverThreshold, which, when);
+            }
         }
     }
 }

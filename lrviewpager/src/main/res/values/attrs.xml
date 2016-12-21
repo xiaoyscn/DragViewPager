@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="DragViewPager">
+        <attr name="resetDuration" format="reference|integer"/>
+        <attr name="dampingFactor" format="reference|float"/>
+        <attr name="scrollThreshold" format="reference|dimension"/>
+        <attr name="scrollThresholdRatio" format="reference|float"/>
+    </declare-styleable>
+</resources>

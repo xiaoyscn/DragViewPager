@@ -1,7 +1,6 @@
 package xiaoys.me.lrviewpager;
 
 import android.content.Context;
-import android.graphics.Color;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
@@ -15,10 +14,7 @@ import android.widget.TextView;
  * Created by xiaoys on 2016/10/9.
  */
 
-public class DefaultUIHandler extends FrameLayout implements IUIHandler {
-
-    public static final int ORIENTATION_LEFT = 0;
-    public static final int ORIENTATION_RIGHT = 1;
+public class DefaultUIHandler extends FrameLayout implements DragViewPager.IUIHandler {
 
     private TextView mTextContent;
     private ImageView mImageIcon;
@@ -27,51 +23,31 @@ public class DefaultUIHandler extends FrameLayout implements IUIHandler {
     private int mRightIcon = R.mipmap.ic_arrow_circle_right;
     private String mDragText = "";
     private String mReleaseText = "";
-    private int mOrientation;
 
-    public DefaultUIHandler(Context context, int orientation) {
-        this(context, null);
-        mOrientation = orientation;
+    public DefaultUIHandler(Context context) {
+        super(context);
+        init(context);
     }
 
-    public DefaultUIHandler(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public DefaultUIHandler(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        init(context, attrs, defStyleAttr);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public DefaultUIHandler(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
-        init(context, attrs, defStyleAttr);
-    }
-
-    private void init(Context context, AttributeSet attrs, int defStyleAttr) {
+    private void init(Context context) {
         View.inflate(context, R.layout.default_ui_handler, this);
         mTextContent = (TextView) findViewById(R.id.tv_content);
         mImageIcon = (ImageView) findViewById(R.id.iv_icon);
     }
 
-    public void setOrientation(int orientation){
-        mOrientation = orientation;
-    }
-
-    public void setDragText(String dragText){
+    public void setDragText(String dragText) {
         mDragText = dragText;
     }
 
-    public void setReleaseText(String releaseText){
+    public void setReleaseText(String releaseText) {
         mReleaseText = releaseText;
     }
 
-    private void setText(@NonNull String text){
+    private void setText(@NonNull String text) {
         StringBuilder origin = new StringBuilder(text);
         StringBuilder format = new StringBuilder();
         int textLength = origin.length();
-        for (int i = 0; i < textLength; i++){
+        for (int i = 0; i < textLength; i++) {
             format.append(origin.charAt(i));
             format.append("\n");
         }
@@ -79,40 +55,32 @@ public class DefaultUIHandler extends FrameLayout implements IUIHandler {
     }
 
     @Override
-    public void onBegin(LRPtrViewPager viewPager) {
+    public void onBegin(DragViewPager viewPager, @DragViewPager.Which int which) {
         setText(mDragText);
     }
 
     @Override
-    public void onPull(LRPtrViewPager viewPager) {
-        if (viewPager.isOverThreshold()){
-            if (!mReleaseText.equals(mTextContent.getText().toString())){
+    public void onPull(DragViewPager viewPager, @DragViewPager.Which int which) {
+        if (viewPager.isOverThreshold()) {
+            if (!mReleaseText.equals(mTextContent.getText().toString())) {
                 setText(mReleaseText);
-                if (mOrientation == ORIENTATION_LEFT){
-                    mImageIcon.setImageResource(mLeftIcon);
-                }else{
-                    mImageIcon.setImageResource(mRightIcon);
-                }
+                mImageIcon.setImageResource(DragViewPager.LEFT == which ? mLeftIcon : mRightIcon);
             }
-        }else{
-            if (!mDragText.equals(mTextContent.getText().toString())){
+        } else {
+            if (!mDragText.equals(mTextContent.getText().toString())) {
                 setText(mDragText);
-                if (mOrientation == ORIENTATION_LEFT){
-                    mImageIcon.setImageResource(mRightIcon);
-                }else{
-                    mImageIcon.setImageResource(mLeftIcon);
-                }
+                mImageIcon.setImageResource(DragViewPager.LEFT == which ? mRightIcon : mLeftIcon);
             }
         }
     }
 
     @Override
-    public void onRelease(LRPtrViewPager viewPager) {
+    public void onRelease(DragViewPager viewPager, @DragViewPager.Which int which) {
 
     }
 
     @Override
-    public void onEnd(LRPtrViewPager viewPager) {
+    public void onEnd(DragViewPager viewPager, @DragViewPager.Which int which) {
 
     }
 }
