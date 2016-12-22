@@ -11,7 +11,6 @@ import android.support.annotation.IntDef;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -57,7 +56,8 @@ public class DragViewPager extends ViewGroup implements ValueAnimator.AnimatorUp
     private Interpolator mResetInterpolator;
 
     private PointF mActDownPoint = new PointF();
-    private PointF mActMovePoint = new PointF();
+    private PointF mActMoveStartPoint = new PointF();
+    private PointF mActMovingPoint = new PointF();
     private int mWhich;
     private boolean mIsOverThresholdWhenRelease;
     private boolean mIsCancelReset;
@@ -131,26 +131,26 @@ public class DragViewPager extends ViewGroup implements ValueAnimator.AnimatorUp
         switch (ev.getAction() & MotionEvent.ACTION_MASK) {
             case MotionEvent.ACTION_DOWN:
                 LRUtils.cancelAnimator(mResetAnimator);
-                if (mWhich != NONE) {
-                    return true;
-                }
                 mActDownPoint.set(ev.getX(), ev.getY());
                 break;
             case MotionEvent.ACTION_MOVE:
-                mActMovePoint.set(ev.getX(), ev.getY());
+                if (mWhich != NONE) {
+                    mActMoveStartPoint.set(ev.getX() - LRUtils.computeTouchDistance(getScrollX(), mDampingFactor), ev.getY());
+                    return true;
+                }
+                mActMoveStartPoint.set(ev.getX(), ev.getY());
                 //如果是最后一个，拦截向左滑动事件
-                if (isLastItem() && mActMovePoint.x - mActDownPoint.x < -mMinTouchDistance) {
+                if (isLastItem() && mActMoveStartPoint.x - mActDownPoint.x < -mMinTouchDistance) {
                     mWhich = RIGHT;
                     LRUtils.sendUIHandlerOnBegin(mUIHandlers, mWhich, this);
                     return true;
                 }
                 //如果是第一个， 拦截向右滑动事件
-                else if (isFirstItem() && mActMovePoint.x - mActDownPoint.x > mMinTouchDistance) {
+                else if (isFirstItem() && mActMoveStartPoint.x - mActDownPoint.x > mMinTouchDistance) {
                     mWhich = LEFT;
                     LRUtils.sendUIHandlerOnBegin(mUIHandlers, mWhich, this);
                     return true;
                 }
-//                resetOffset();
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
@@ -167,7 +167,7 @@ public class DragViewPager extends ViewGroup implements ValueAnimator.AnimatorUp
             case MotionEvent.ACTION_DOWN:
                 return true;
             case MotionEvent.ACTION_MOVE:
-                mActMovePoint.set(event.getX(), event.getY());
+                mActMovingPoint.set(event.getX(), event.getY());
                 performScroll();
                 return true;
             case MotionEvent.ACTION_UP:
@@ -180,16 +180,9 @@ public class DragViewPager extends ViewGroup implements ValueAnimator.AnimatorUp
     }
 
     private void performScroll() {
-        int offset = (int) (mActMovePoint.x - mActDownPoint.x);
-        if (mWhich == LEFT) {
-            offset = Math.max(offset, 0);
-            scrollTo(-LRUtils.computeScrollDistance(offset, mDampingFactor), 0);
-            LRUtils.sendUIHandlerOnPull(mUIHandlers, LEFT, this);
-        } else if (mWhich == RIGHT) {
-            offset = Math.min(offset, 0);
-            scrollTo(LRUtils.computeScrollDistance(offset, mDampingFactor), 0);
-            LRUtils.sendUIHandlerOnPull(mUIHandlers, RIGHT, this);
-        }
+        float touchDistance = mActMovingPoint.x - mActMoveStartPoint.x;
+        scrollTo(LRUtils.computeScrollDistance(touchDistance, mDampingFactor, mWhich), 0);
+        LRUtils.sendUIHandlerOnPull(mUIHandlers, mWhich, this);
     }
 
     private void performRelease() {

@@ -1,1 +1,1 @@
-include ':lrviewpager', ':sample'
+include ':dragviewpager', ':sample'

@@ -3,10 +3,12 @@ package xiaoys.me.lrviewpager;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.View;
 
 import java.util.List;
 
+import static android.R.attr.offset;
 import static android.view.View.OVER_SCROLL_NEVER;
 
 /**
@@ -29,9 +31,24 @@ class LRUtils {
         }
     }
 
-    static int computeScrollDistance(int offset, float factor) {
-        int absOffset = Math.abs(offset);
-        return (int) Math.pow(absOffset, factor);
+    static int computeScrollDistance(float touchDistance, float factor, @DragViewPager.Which int which) {
+        if (which == DragViewPager.LEFT) {
+            touchDistance = Math.max(0, touchDistance);
+            return (int) -Math.pow(Math.abs(touchDistance), factor);
+        } else if (which == DragViewPager.RIGHT) {
+            touchDistance = Math.min(0, touchDistance);
+            return (int) Math.pow(Math.abs(touchDistance), factor);
+        }
+        return 0;
+    }
+
+    static float computeTouchDistance(int scrollDistance, float factor) {
+        if (scrollDistance < 0) {
+            return (float) Math.pow(Math.abs(scrollDistance), 1.0f / factor);
+        } else if (scrollDistance > 0) {
+            return -(float) Math.pow(Math.abs(scrollDistance), 1.0f / factor);
+        }
+        return 0;
     }
 
     static void cancelAnimator(ValueAnimator animator) {
