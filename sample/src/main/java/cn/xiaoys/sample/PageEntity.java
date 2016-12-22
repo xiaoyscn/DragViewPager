@@ -1,4 +1,4 @@
-package xiaoys.me.sample;
+package cn.xiaoys.sample;
 
 /**
  * Created by xiaoys on 2016/10/8.

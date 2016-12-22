@@ -1,4 +1,4 @@
-package xiaoys.me.sample;
+package cn.xiaoys.sample;
 
 import android.support.annotation.LayoutRes;
 import android.support.v4.view.PagerAdapter;

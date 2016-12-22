@@ -1,4 +1,4 @@
-package xiaoys.me.lrviewpager;
+package cn.xiaoys.sample;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("xiaoys.me.lrviewpager.test", appContext.getPackageName());
+        assertEquals("xiaoys.me.sample", appContext.getPackageName());
     }
 }

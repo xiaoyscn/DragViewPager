@@ -1,4 +1,4 @@
-package xiaoys.me.sample;
+package cn.xiaoys.sample;
 
 import org.junit.Test;
 

@@ -1,8 +1,7 @@
-package xiaoys.me.sample;
+package cn.xiaoys.sample;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -13,8 +12,8 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import xiaoys.me.lrviewpager.DefaultUIHandler;
-import xiaoys.me.lrviewpager.DragViewPager;
+import cn.xiaoys.dragviewpager.DefaultUIHandler;
+import cn.xiaoys.dragviewpager.DragViewPager;
 
 public class MainActivity extends AppCompatActivity {
 

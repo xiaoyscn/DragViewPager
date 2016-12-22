@@ -1,4 +1,4 @@
-package xiaoys.me.lrviewpager;
+package cn.xiaoys.dragviewpager;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;

@@ -5,7 +5,7 @@ android {
     buildToolsVersion "24.0.2"
 
     defaultConfig {
-        applicationId "xiaoys.me.sample"
+        applicationId "cn.xiaoys.dragviewpager.sample"
         minSdkVersion 14
         targetSdkVersion 24
         versionCode 1
