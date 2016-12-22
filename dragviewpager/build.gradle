@@ -3,14 +3,14 @@ apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.1"
+    compileSdkVersion COMPILE_SDK_VERSION as int
+    buildToolsVersion BUILD_SDK_TOOLS
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 25
-        versionCode 1
-        versionName "1.0"
+        minSdkVersion MIN_SDK as int
+        targetSdkVersion TARGET_SDK as int
+        versionCode VERSION_CODE as int
+        versionName VERSION_NAME
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -36,6 +36,7 @@ def siteUrl = 'https://github.com/xiaoyscn/DragViewPager'
 def gitUrl = 'https://github.com/xiaoyscn/DragViewPager.git'
 
 group = "cn.xiaoys.DragViewPager"
+version = VERSION_NAME
 
 install {
     repositories.mavenInstaller {
@@ -69,7 +70,6 @@ install {
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
-    classifier = 'sources'
 }
 
 task javadoc(type: Javadoc) {

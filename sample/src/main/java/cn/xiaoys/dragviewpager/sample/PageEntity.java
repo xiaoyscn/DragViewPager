@@ -1,4 +1,4 @@
-package cn.xiaoys.sample;
+package cn.xiaoys.dragviewpager.sample;
 
 /**
  * Created by xiaoys on 2016/10/8.

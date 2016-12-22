@@ -1,4 +1,4 @@
-package cn.xiaoys.sample;
+package cn.xiaoys.dragviewpager.sample;
 
 import android.support.annotation.LayoutRes;
 import android.support.v4.view.PagerAdapter;

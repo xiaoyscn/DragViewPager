@@ -1,4 +1,4 @@
-package cn.xiaoys.sample;
+package cn.xiaoys.dragviewpager.sample;
 
 import android.graphics.Color;
 import android.os.Bundle;

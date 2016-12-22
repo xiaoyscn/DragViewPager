@@ -1,4 +1,4 @@
-package cn.xiaoys.sample;
+package cn.xiaoys.dragviewpager.sample;
 
 import android.app.Application;
 import android.os.Process;

@@ -17,8 +17,12 @@ allprojects {
     repositories {
         jcenter()
     }
-}
+    tasks.withType(Javadoc).all {
+        enabled = false
+        options.setEncoding('UTF-8')
+    }
 
-task clean(type: Delete) {
-    delete rootProject.buildDir
+    task clean(type: Delete) {
+        delete rootProject.buildDir
+    }
 }
