@@ -28,9 +28,11 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.0.1'
+    provided 'com.android.support:appcompat-v7:25.0.1'
     testCompile 'junit:junit:4.12'
 }
+
+version = VERSION_NAME
 
 install {
     repositories.mavenInstaller {
@@ -64,6 +66,7 @@ install {
 
 task sourcesJar(type: Jar) {
     from android.sourceSets.main.java.srcDirs
+    classifier = 'sources'
 }
 
 task javadoc(type: Javadoc) {
@@ -94,6 +97,7 @@ bintray {
 
     pkg {
         repo = "maven"
+        userOrg = 'xiaoys-personal'
         name = PROJ_NAME
         websiteUrl = PROJ_WEBSITEURL
         vcsUrl = PROJ_VCSURL
