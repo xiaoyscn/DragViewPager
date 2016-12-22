@@ -32,36 +32,30 @@ dependencies {
     testCompile 'junit:junit:4.12'
 }
 
-def siteUrl = 'https://github.com/xiaoyscn/DragViewPager'
-def gitUrl = 'https://github.com/xiaoyscn/DragViewPager.git'
-
-group = "cn.xiaoys.DragViewPager"
-version = VERSION_NAME
-
 install {
     repositories.mavenInstaller {
         pom {
             project {
                 packaging 'aar'
-                name 'a wrapper ViewPager widget for Android' //项目描述
-                url siteUrl
+                name PROJ_DESCRPTION
+                url PROJ_WEBSITEURL
                 licenses {
                     license {
-                        name 'The Apache Software License, Version 2.0'
-                        url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        name LICENSE_NAME
+                        url LICENSE_URL
                     }
                 }
                 developers {
                     developer {
-                        id 'xiaoys' //填写的一些基本信息
-                        name 'xiaoys'
-                        email 'xiaoyisheng_cn@outlook.com'
+                        id DEVELOPER_ID
+                        name DEVELOPER_NAME
+                        email DEVELOPER_EMAIL
                     }
                 }
                 scm {
-                    connection gitUrl
-                    developerConnection gitUrl
-                    url siteUrl
+                    connection PROJ_VCSURL
+                    developerConnection PROJ_VCSURL
+                    url PROJ_WEBSITEURL
                 }
             }
         }
@@ -94,13 +88,16 @@ properties.load(project.rootProject.file('local.properties').newDataInputStream(
 bintray {
     user = properties.getProperty("bintray.user")
     key = properties.getProperty("bintray.apikey")
-    configurations = ['archives']
+
+    configurations = ['published', 'archives']
+    publish = true
+
     pkg {
         repo = "maven"
-        name = "DragViewPager"
-        websiteUrl = siteUrl
-        vcsUrl = gitUrl
+        name = PROJ_NAME
+        websiteUrl = PROJ_WEBSITEURL
+        vcsUrl = PROJ_VCSURL
         licenses = ["Apache-2.0"]
-        publish = true
+        publicDownloadNumbers = true
     }
 }
